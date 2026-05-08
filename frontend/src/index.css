@@ -1,0 +1,460 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   SIGNALTHIEF — TERMINAL BRUTALIST DESIGN SYSTEM
+   No rounded corners. No box shadows. No gradients.
+   Monospace or CRT. Amber on black. Brutal.
+   ============================================= */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: #050505;
+    color: #e0e0e0;
+    font-family: 'IBM Plex Mono', 'Source Code Pro', monospace;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    text-rendering: geometricPrecision;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #0a0a0a;
+    overflow-x: hidden;
+  }
+
+  /* CRT scanline overlay — subtle, always present */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.03) 0px,
+      rgba(0, 0, 0, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  ::selection {
+    background: #ff6b00;
+    color: #0a0a0a;
+  }
+
+  /* Custom scrollbar — brutal */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #ff6b00;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ff8c33;
+  }
+}
+
+@layer components {
+  /* ========== BORDER SYSTEM ========== */
+  /* All borders are 1px solid #222. Sharp. Clean. */
+  .brutal-border {
+    border: 1px solid #222222;
+  }
+
+  .brutal-border-amber {
+    border: 1px solid #ff6b00;
+  }
+
+  .brutal-border-top {
+    border-top: 1px solid #222222;
+  }
+
+  .brutal-border-bottom {
+    border-bottom: 1px solid #222222;
+  }
+
+  /* ========== PANELS ========== */
+  .brutal-panel {
+    background: #111111;
+    border: 1px solid #222222;
+  }
+
+  .brutal-panel-darker {
+    background: #0a0a0a;
+    border: 1px solid #222222;
+  }
+
+  /* ========== TERMINAL TEXT ========== */
+  .terminal-text {
+    font-family: 'VT323', 'Courier New', monospace;
+    letter-spacing: 1px;
+  }
+
+  .mono-text {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* ========== TERMINAL PROMPT ========== */
+  .prompt::before {
+    content: '> ';
+    color: #ff6b00;
+    font-weight: 700;
+  }
+
+  .prompt-alt::before {
+    content: '$ ';
+    color: #00ff41;
+    font-weight: 700;
+  }
+
+  /* ========== DIVIDERS ========== */
+  .hr-brutal {
+    border: none;
+    border-top: 1px solid #222222;
+    margin: 0;
+  }
+
+  .hr-accent {
+    border: none;
+    border-top: 1px solid #ff6b00;
+    margin: 0;
+  }
+
+  /* ========== STATUS INDICATORS ========== */
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #00ff41;
+    animation: blink 1s step-end infinite;
+  }
+
+  .status-dot-error {
+    background: #ff3333;
+    animation: blink 1s step-end infinite;
+  }
+
+  .status-dot-amber {
+    background: #ff6b00;
+    animation: blink 1.5s step-end infinite;
+  }
+
+  /* ========== BUTTONS — BRUTALIST ========== */
+  .btn-brutal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: 1px solid #222222;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    transition: all 80ms ease;
+    text-decoration: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  .btn-brutal:hover {
+    background: #111111;
+    border-color: #ff6b00;
+  }
+
+  .btn-brutal:active {
+    background: #ff6b00;
+    border-color: #ff6b00;
+    color: #0a0a0a;
+  }
+
+  .btn-brutal:focus-visible {
+    outline: 1px solid #ff6b00;
+    outline-offset: 2px;
+  }
+
+  .btn-brutal:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #222222;
+  }
+
+  .btn-brutal:disabled:hover {
+    background: #0a0a0a;
+    border-color: #222222;
+  }
+
+  .btn-brutal-primary {
+    border-color: #ff6b00;
+    color: #ff6b00;
+  }
+
+  .btn-brutal-primary:hover {
+    background: #111111;
+    border-color: #ff8c33;
+  }
+
+  .btn-brutal-primary:active {
+    background: #ff6b00;
+    color: #0a0a0a;
+  }
+
+  .btn-brutal-danger {
+    border-color: #ff3333;
+    color: #ff3333;
+  }
+
+  .btn-brutal-danger:hover {
+    background: #1a0000;
+    border-color: #ff5555;
+  }
+
+  .btn-brutal-danger:active {
+    background: #ff3333;
+    color: #0a0a0a;
+  }
+
+  .btn-brutal-sm {
+    padding: 5px 12px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-brutal-lg {
+    padding: 14px 28px;
+    font-size: 15px;
+  }
+
+  /* ========== INPUTS — BRUTALIST ========== */
+  .input-brutal {
+    width: 100%;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    background: #0a0a0a;
+    border: 1px solid #222222;
+    color: #e0e0e0;
+    outline: none;
+    transition: border-color 80ms ease;
+    caret-color: #ff6b00;
+  }
+
+  .input-brutal::placeholder {
+    color: #444444;
+    font-style: italic;
+  }
+
+  .input-brutal:focus {
+    border-color: #ff6b00;
+  }
+
+  .input-brutal:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* ========== SELECT — BRUTALIST ========== */
+  .select-brutal {
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #0a0a0a;
+    border: 1px solid #222222;
+    color: #e0e0e0;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23666666' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+
+  .select-brutal:focus {
+    border-color: #ff6b00;
+  }
+
+  /* ========== BADGE / TAG ========== */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid #222222;
+    color: #888888;
+  }
+
+  .badge-amber {
+    border-color: #ff6b00;
+    color: #ff6b00;
+    background: rgba(255, 107, 0, 0.05);
+  }
+
+  .badge-green {
+    border-color: #00ff41;
+    color: #00ff41;
+    background: rgba(0, 255, 65, 0.05);
+  }
+
+  /* ========== TABLE — BRUTALIST ========== */
+  .table-brutal {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .table-brutal th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #333333;
+    color: #888888;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+  }
+
+  .table-brutal td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .table-brutal tr:hover td {
+    background: #0d0d0d;
+  }
+
+  .table-brutal tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* ========== SKELETON LOADER ========== */
+  .skeleton {
+    background: #111111;
+    border: 1px solid #222222;
+    animation: flicker 1.5s infinite;
+  }
+
+  .skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+    width: 80%;
+  }
+
+  .skeleton-text-short {
+    width: 40%;
+  }
+
+  .skeleton-block {
+    height: 48px;
+  }
+
+  /* ========== TOAST / NOTIFICATION ========== */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background: #111111;
+    border: 1px solid #ff6b00;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #e0e0e0;
+    z-index: 10000;
+    animation: glitch 0.2s ease;
+  }
+
+  .toast-error {
+    border-color: #ff3333;
+  }
+
+  .toast-success {
+    border-color: #00ff41;
+  }
+
+  /* ========== ASCII ART CORNER ========== */
+  .ascii-corner::before {
+    content: '+';
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #222222;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1;
+    padding: 4px;
+  }
+
+  .ascii-corner::after {
+    content: '+';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: #222222;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1;
+    padding: 4px;
+  }
+}
+
+@layer utilities {
+  /* ========== TEXT COLORS ========== */
+  .text-dim {
+    color: #666666;
+  }
+
+  .text-muted {
+    color: #888888;
+  }
+
+  .text-accent {
+    color: #ff6b00;
+  }
+
+  .text-success {
+    color: #00ff41;
+  }
+
+  .text-danger {
+    color: #ff3333;
+  }
+
+  /* ========== TYPEWRITER CLIP ========== */
+  .typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typewriter 2s steps(20) forwards;
+  }
+
+  /* ========== GLITCH ON HOVER ========== */
+  .hover\\:glitch:hover {
+    animation: glitch 0.3s ease;
+  }
+}

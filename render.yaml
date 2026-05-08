@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: signalthief-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: CACHE_MAX_AGE
+        value: "3600000"
+      - key: LOG_LEVEL
+        value: info
+    dockerfilePath: backend/Dockerfile

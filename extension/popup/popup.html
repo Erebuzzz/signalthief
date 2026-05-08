@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalThief</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">🎵</span>
+        <h1>SignalThief</h1>
+      </div>
+      <div class="header-actions">
+        <button id="openWebApp" class="icon-btn" title="Open Web App">🌐</button>
+        <button id="refreshBtn" class="icon-btn" title="Refresh">🔄</button>
+      </div>
+    </header>
+
+    <!-- Page Info -->
+    <div id="pageInfo" class="page-info">
+      <span id="pageTitle">Loading...</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="detected">Detected Media</button>
+      <button class="tab" data-tab="url">Paste URL</button>
+    </div>
+
+    <!-- Detected Media Tab -->
+    <div id="detectedTab" class="tab-content active">
+      <div id="sourceList" class="source-list">
+        <div class="loading">Scanning for media...</div>
+      </div>
+      <div id="noSources" class="no-sources hidden">
+        <p>No media detected on this page</p>
+        <p class="hint">Try playing audio/video or paste a URL in the other tab</p>
+      </div>
+    </div>
+
+    <!-- URL Tab -->
+    <div id="urlTab" class="tab-content">
+      <div class="url-form">
+        <input type="text" id="urlInput" placeholder="Paste YouTube, SoundCloud, or any media URL..." />
+        <button id="extractBtn" class="btn primary">Extract</button>
+      </div>
+      <div id="extractResult" class="extract-result hidden">
+        <div id="mediaInfo" class="media-info"></div>
+      </div>
+      <div id="extractLoading" class="loading hidden">
+        Extracting media info...
+      </div>
+      <div id="extractError" class="error hidden"></div>
+    </div>
+
+    <!-- Format Picker Modal -->
+    <div id="formatModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Download Options</h2>
+          <button id="closeModal" class="icon-btn">✕</button>
+        </div>
+        <div id="modalBody" class="modal-body">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
