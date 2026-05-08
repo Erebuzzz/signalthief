@@ -5,6 +5,49 @@ import type { MediaInfo, MediaFormat, SubtitleTrack } from '../../../shared/type
 const execFileAsync = promisify(execFile);
 
 const YT_DLP_PATH = process.env.YT_DLP_PATH || 'yt-dlp';
+let INSTALL_PROMISE: Promise<boolean> | null = null;
+
+async function tryAutoInstall(): Promise<boolean> {
+  if (await isInstalled()) return true;
+
+  console.log('[yt-dlp] Not found — attempting auto-install...');
+
+  // Try pip first (most reliable)
+  const installCommands = [
+    { args: ['python3', '-m', 'pip', 'install', '-q', 'yt-dlp'], bin: 'python3' },
+    { args: ['python', '-m', 'pip', 'install', '-q', 'yt-dlp'], bin: 'python' },
+    { args: ['pip3', 'install', '-q', 'yt-dlp'], bin: 'pip3' },
+    { args: ['pip', 'install', '-q', 'yt-dlp'], bin: 'pip' },
+    { args: ['npx', '-y', 'yt-dlp'], bin: 'npx' },
+  ];
+
+  for (const { args } of installCommands) {
+    try {
+      const { stdout, stderr } = await execFileAsync(args[0], args.slice(1), { timeout: 60000 });
+      // Re-check if yt-dlp is now available
+      if (await isInstalled()) {
+        console.log('[yt-dlp] Auto-installed successfully');
+        return true;
+      }
+    } catch {
+      // Try next method
+    }
+  }
+
+  console.error('[yt-dlp] Auto-install failed. Please install manually:');
+  console.error('  Windows: winget install yt-dlp.yt-dlp');
+  console.error('  macOS:   brew install yt-dlp');
+  console.error('  Linux:   pip install yt-dlp');
+  return false;
+}
+
+export async function ensureInstalled(): Promise<boolean> {
+  if (await isInstalled()) return true;
+  if (!INSTALL_PROMISE) {
+    INSTALL_PROMISE = tryAutoInstall();
+  }
+  return INSTALL_PROMISE;
+}
 
 // Known audio codecs, sorted by quality (best first)
 const AUDIO_QUALITY_ORDER: Record<string, number> = {

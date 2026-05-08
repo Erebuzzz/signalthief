@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { extractInfo, isInstalled } from '../services/yt-dlp.js';
+import { extractInfo, ensureInstalled } from '../services/yt-dlp.js';
 import type { ExtractRequest, ExtractResponse } from '../../../shared/types.js';
 import { ApiError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
@@ -31,8 +31,8 @@ export async function extractRoutes(app: FastifyInstance) {
         throw new ApiError(400, 'Invalid URL format');
       }
 
-      // Check if yt-dlp is installed
-      const installed = await isInstalled();
+      // Check if yt-dlp is installed (auto-install if missing)
+      const installed = await ensureInstalled();
       if (!installed) {
         throw new ApiError(503, 'yt-dlp is not installed on the server');
       }
@@ -73,15 +73,5 @@ export async function extractRoutes(app: FastifyInstance) {
           : err.message || 'Failed to extract media info',
       } as ExtractResponse);
     }
-  });
-
-  // GET /api/health — health check
-  app.get('/api/health', async (_request: FastifyRequest, reply: FastifyReply) => {
-    const ytDlp = await isInstalled();
-    return reply.send({
-      status: 'ok',
-      ytDlp,
-      timestamp: Date.now(),
-    });
   });
 }

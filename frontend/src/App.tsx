@@ -4,6 +4,8 @@ import Header from './components/Header';
 import UrlInput from './components/UrlInput';
 import MediaCard from './components/MediaCard';
 import Footer from './components/Footer';
+import Terminal from './components/Terminal';
+import HowToUse from './components/HowToUse';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -24,6 +26,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [statusText, setStatusText] = useState('IDLE');
+  const [currentPage, setCurrentPage] = useState<'app' | 'help'>('app');
 
   const addToast = useCallback((type: Toast['type'], message: string) => {
     const id = Date.now();
@@ -148,8 +151,16 @@ export default function App() {
         ))}
       </div>
 
-      <Header />
+      <Header
+        currentPage={currentPage}
+        onNavigate={(page: 'app' | 'help') => setCurrentPage(page)}
+      />
 
+      {currentPage === 'help' ? (
+        <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
+          <HowToUse onBack={() => setCurrentPage('app')} />
+        </main>
+      ) : (
       <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
         {/* URL Input Section */}
         <section className="brutal-panel p-6 mb-8">
@@ -291,29 +302,14 @@ export default function App() {
           </section>
         )}
 
-        {/* Idle State */}
+        {/* Idle State with Terminal */}
         {!loading && !mediaInfo && !error && (
-          <section className="brutal-panel p-8 text-center">
-            <pre className="text-dim text-xs font-mono leading-relaxed select-none mb-4" aria-hidden="true">
-{`  +--------------------------------------------------+
-  |  SIGNALTHIEF v1.0.0                              |
-  |  Ad-free Media Extractor                          |
-  |                                                   |
-  |  SUPPORTS: 1800+ sites                            |
-  |  YouTube, SoundCloud, Bandcamp, Vimeo,            |
-  |  Twitter/X, Instagram, TikTok, Spotify,           |
-  |  and many more...                                  |
-  |                                                   |
-  |  OUTPUT: MP3, FLAC, AAC, Opus, WAV, M4A,          |
-  |  MP4, WebM, MKV                                   |
-  +--------------------------------------------------+`}
-            </pre>
-            <p className="text-dim text-xs font-mono">
-              <span className="text-accent">{'>'}</span> Enter a URL above to begin extraction...
-            </p>
+          <section className="mb-8">
+            <Terminal />
           </section>
         )}
       </main>
+      )}
 
       <Footer statusText={statusText} />
     </div>

@@ -12,13 +12,23 @@ const PORT = parseInt(process.env.PORT || '3001', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 
 async function main() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const loggerConfig: any = {
+    level: process.env.LOG_LEVEL || 'info',
+  };
+
+  // Only use pino-pretty in development if available
+  if (!isProduction) {
+    try {
+      await import('pino-pretty');
+      loggerConfig.transport = { target: 'pino-pretty', options: { colorize: true } };
+    } catch {
+      // pino-pretty not installed, fall back to default JSON logger
+    }
+  }
+
   const app = Fastify({
-    logger: {
-      level: process.env.LOG_LEVEL || 'info',
-      transport: process.env.NODE_ENV === 'production'
-        ? undefined
-        : { target: 'pino-pretty', options: { colorize: true } },
-    },
+    logger: loggerConfig,
     bodyLimit: 10 * 1024 * 1024, // 10MB
     requestTimeout: 300000, // 5 minutes
   });

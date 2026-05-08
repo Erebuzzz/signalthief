@@ -1,4 +1,9 @@
-export default function Header() {
+interface HeaderProps {
+  currentPage: 'app' | 'help';
+  onNavigate: (page: 'app' | 'help') => void;
+}
+
+export default function Header({ currentPage, onNavigate }: HeaderProps) {
   return (
     <header className="brutal-border-bottom bg-dark/90 backdrop-blur supports-[backdrop-filter]:bg-dark/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -11,6 +16,21 @@ export default function Header() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          {currentPage === 'help' ? (
+            <button
+              onClick={() => onNavigate('app')}
+              className="btn-brutal btn-brutal-sm"
+            >
+              BACK
+            </button>
+          ) : (
+            <button
+              onClick={() => onNavigate('help')}
+              className="btn-brutal btn-brutal-sm"
+            >
+              HELP
+            </button>
+          )}
           <a
             href="https://github.com/Erebuzzz/signalthief"
             target="_blank"
@@ -19,15 +39,6 @@ export default function Header() {
             title="GitHub Repository"
           >
             GIT
-          </a>
-          <a
-            href="https://github.com/Erebuzzz/signalthief#readme"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-brutal btn-brutal-sm"
-            title="Documentation"
-          >
-            DOCS
           </a>
         </div>
       </div>
