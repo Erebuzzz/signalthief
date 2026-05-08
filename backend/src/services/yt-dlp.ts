@@ -78,7 +78,7 @@ export async function extractInfo(url: string): Promise<MediaInfo> {
     '--extractor-retries', '3',
     '--socket-timeout', '30',
     '--js-runtimes', 'node',
-    '--extractor-args', 'youtube:player_client=web,ios',
+    '--extractor-args', 'youtube:player_client=android,ios,web',
     url,
   ];
 
@@ -121,7 +121,7 @@ export async function downloadMedia(
     '--no-progress',
     '--no-part',
     '--js-runtimes', 'node',
-    '--extractor-args', 'youtube:player_client=web,ios',
+    '--extractor-args', 'youtube:player_client=android,ios,web',
     ...extraArgs,
     url,
   ];
