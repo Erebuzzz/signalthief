@@ -77,6 +77,7 @@ export async function extractInfo(url: string): Promise<MediaInfo> {
     '--no-check-certificates',
     '--extractor-retries', '3',
     '--socket-timeout', '30',
+    '--js-runtimes', 'node',
     url,
   ];
 
@@ -118,6 +119,7 @@ export async function downloadMedia(
     '--no-check-certificates',
     '--no-progress',
     '--no-part',
+    '--js-runtimes', 'node',
     ...extraArgs,
     url,
   ];
