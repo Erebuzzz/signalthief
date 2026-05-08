@@ -10,7 +10,7 @@
 
 ---
 
-## 📦 Architecture
+## Architecture
 
 ```mermaid
 graph TB
@@ -64,7 +64,7 @@ graph TB
     style H fill:#0f3460,stroke:#e94560,color:#e0e0e0
 ```
 
-## 🔄 Data Flow
+## Data Flow
 
 ```mermaid
 sequenceDiagram
@@ -95,7 +95,7 @@ sequenceDiagram
     Note over API,FS: Temp files auto-cleaned after stream
 ```
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 signalthief/
@@ -152,7 +152,7 @@ signalthief/
 └── README.md
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -213,14 +213,14 @@ Open **http://localhost:5173** in your browser.
 4. Or paste a URL in the "Paste URL" tab
 5. Choose format and download
 
-## 🎛️ Supported Formats
+## Supported Formats
 
 | Category | Formats |
 |----------|---------|
 | **Audio** | MP3 (recommended), AAC, FLAC (lossless), Opus, OGG Vorbis, WAV (uncompressed), M4A, Best (original) |
 | **Video** | MP4, WebM, MKV |
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ```bash
 # Build and run with Docker Compose
@@ -232,7 +232,7 @@ docker build -t signalthief-api .
 docker run -p 3001:3001 signalthief-api
 ```
 
-## ☁️ One-Click Deploy to Render
+## One-Click Deploy to Render
 
 The project includes a [`render.yaml`](render.yaml) configured for **Render's free tier**:
 
@@ -243,7 +243,7 @@ The project includes a [`render.yaml`](render.yaml) configured for **Render's fr
 
 > **Note:** Free tier instances spin down after inactivity. First request may take 30-60s to wake.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -256,7 +256,7 @@ The project includes a [`render.yaml`](render.yaml) configured for **Render's fr
 | **Deployment** | Render (free tier) |
 | **Shared Types** | TypeScript interfaces in `shared/` |
 
-## 🧪 Development
+## Development
 
 ```bash
 # TypeScript type-checking
@@ -271,12 +271,12 @@ cd backend && npm run build     # Output: backend/dist/
 npm run lint
 ```
 
-## 📄 License
+## License
 
 MIT © [Erebuzzz](https://github.com/Erebuzzz)
 
 ---
 
 <p align="center">
-  <sub>Built with ❤️ · No ads · No bloat · Just media</sub>
+  <sub>Built with a sane mind · No ads · No bloat · Just media</sub>
 </p>
