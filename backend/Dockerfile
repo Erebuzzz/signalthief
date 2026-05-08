@@ -6,10 +6,11 @@ RUN pip3 install --break-system-packages yt-dlp
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci --only=production
 
-COPY . .
+COPY backend/ ./
+COPY shared/ ./shared/
 RUN npm run build || true
 
 ENV PORT=3001
