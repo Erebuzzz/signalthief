@@ -1,64 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { extractInfo, ensureInstalled } from '../services/yt-dlp.js';
+import { extractInfo, ensureInstalled, mapYtDlpFailureForApi } from '../services/yt-dlp.js';
 import type { ExtractRequest, ExtractResponse } from '../../../shared/types.js';
 import { ApiError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import { rateLimiter } from '../lib/rate-limit.js';
-
-function trimClientError(msg: string, maxLen = 400): string {
-  const t = msg.replace(/\s+/g, ' ').trim();
-  return t.length > maxLen ? `${t.slice(0, maxLen)}…` : t;
-}
-
-/** Map known yt-dlp failures to 422 (content/bot/geo) or 503 (transient). */
-function mapYtDlpFailureToStatus(message: string): { statusCode: number; message: string } | null {
-  const trimmed = trimClientError(message);
-  const lower = message.toLowerCase();
-
-  const unavailableOrBot =
-    lower.includes('video unavailable') ||
-    lower.includes('sign in to confirm') ||
-    lower.includes("you're not a bot") ||
-    lower.includes('not a bot') ||
-    lower.includes('confirm your age') ||
-    lower.includes('age-restricted') ||
-    lower.includes('private video') ||
-    lower.includes('this video is private') ||
-    lower.includes('video is private') ||
-    lower.includes('this video is not available') ||
-    lower.includes('no longer available') ||
-    lower.includes('has been removed') ||
-    lower.includes('members only') ||
-    lower.includes('members-only') ||
-    lower.includes('live event will begin') ||
-    (lower.includes('blocked') &&
-      (lower.includes('copyright') ||
-        lower.includes('country') ||
-        lower.includes('uploader') ||
-        lower.includes('site')));
-
-  if (unavailableOrBot) {
-    return { statusCode: 422, message: trimmed };
-  }
-
-  const transient =
-    lower.includes('http error 503') ||
-    lower.includes('http error 502') ||
-    lower.includes('http error 429') ||
-    /\b429\b/.test(lower) ||
-    lower.includes('too many requests') ||
-    lower.includes('rate limit') ||
-    lower.includes('timed out') ||
-    lower.includes('timeout') ||
-    lower.includes('econnreset') ||
-    lower.includes('socket hang up');
-
-  if (transient) {
-    return { statusCode: 503, message: trimmed };
-  }
-
-  return null;
-}
 
 export async function extractRoutes(app: FastifyInstance) {
   // POST /api/extract — get media info from URL
@@ -119,16 +64,17 @@ export async function extractRoutes(app: FastifyInstance) {
       }
 
       const rawMsg = err?.message || String(err);
-      const mapped = mapYtDlpFailureToStatus(rawMsg);
+      const mapped = mapYtDlpFailureForApi(rawMsg);
       if (mapped) {
         logger.warn('Extraction failed (mapped yt-dlp/client)', {
           statusCode: mapped.statusCode,
-          error: mapped.message.slice(0, 120),
+          clientMessage: mapped.clientMessage,
           duration: Date.now() - start,
+          detail: rawMsg.slice(0, 32000),
         });
         return reply.status(mapped.statusCode).send({
           success: false,
-          error: mapped.message,
+          error: mapped.clientMessage,
         } as ExtractResponse);
       }
 

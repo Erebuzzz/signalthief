@@ -24,6 +24,82 @@ function cookiesArgs(): string[] {
   return [];
 }
 
+/** User-facing text when YouTube blocks the server (bot / sign-in). Keep in sync with DEPLOYMENT.md. */
+export const YT_DLP_YOUTUBE_BOT_CHECK_MESSAGE =
+  'YouTube blocked this request from the server (bot check). Try exporting cookies per DEPLOYMENT.md or use another video.';
+
+function isYoutubeBotSignInOrCaptcha(lower: string): boolean {
+  if (lower.includes('sign in to confirm')) return true;
+  if (lower.includes('not a bot')) return true;
+  if (lower.includes('captcha')) return true;
+  if (lower.includes('cookies-from-browser') || lower.includes('cookies from browser')) return true;
+  if (
+    lower.includes('cookies') &&
+    (lower.includes('youtube') || lower.includes('sign in') || lower.includes('bot'))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function trimClientError(msg: string, maxLen: number): string {
+  const t = msg.replace(/\s+/g, ' ').trim();
+  return t.length > maxLen ? `${t.slice(0, maxLen)}…` : t;
+}
+
+/**
+ * Map yt-dlp stderr / thrown message to HTTP status and a short client-safe message.
+ * Log the full raw string server-side only.
+ */
+export function mapYtDlpFailureForApi(message: string): { statusCode: number; clientMessage: string } | null {
+  const lower = message.toLowerCase();
+
+  if (isYoutubeBotSignInOrCaptcha(lower)) {
+    return { statusCode: 422, clientMessage: YT_DLP_YOUTUBE_BOT_CHECK_MESSAGE };
+  }
+
+  const unavailableOrRestricted =
+    lower.includes('video unavailable') ||
+    lower.includes('confirm your age') ||
+    lower.includes('age-restricted') ||
+    lower.includes('private video') ||
+    lower.includes('this video is private') ||
+    lower.includes('video is private') ||
+    lower.includes('this video is not available') ||
+    lower.includes('no longer available') ||
+    lower.includes('has been removed') ||
+    lower.includes('members only') ||
+    lower.includes('members-only') ||
+    lower.includes('live event will begin') ||
+    (lower.includes('blocked') &&
+      (lower.includes('copyright') ||
+        lower.includes('country') ||
+        lower.includes('uploader') ||
+        lower.includes('site')));
+
+  if (unavailableOrRestricted) {
+    return { statusCode: 422, clientMessage: trimClientError(message, 200) };
+  }
+
+  const transient =
+    lower.includes('http error 503') ||
+    lower.includes('http error 502') ||
+    lower.includes('http error 429') ||
+    /\b429\b/.test(lower) ||
+    lower.includes('too many requests') ||
+    lower.includes('rate limit') ||
+    lower.includes('timed out') ||
+    lower.includes('timeout') ||
+    lower.includes('econnreset') ||
+    lower.includes('socket hang up');
+
+  if (transient) {
+    return { statusCode: 503, clientMessage: trimClientError(message, 200) };
+  }
+
+  return null;
+}
+
 /**
  * For YouTube hosts, normalize music.youtube.com/watch and youtu.be links to
  * canonical https://www.youtube.com/watch?v=VIDEO_ID when the id is parsable.

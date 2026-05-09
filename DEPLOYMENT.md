@@ -101,6 +101,8 @@ The frontend can be deployed separately:
 - You get 750 hours of runtime per month (enough for one always-on instance)
 - Bandwidth is limited to 100GB/month
 
+**YouTube from shared IPs:** YouTube often challenges datacenter traffic; add a Render **Secret** (or env var) `YTDLP_COOKIES_FILE` pointing at the absolute path of a Netscape-format cookies file you export from your browser so the backend can pass `--cookies` to yt-dlp when that file exists. See the [yt-dlp wiki: passing cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp).
+
 ---
 
 ## Option 2: Deploy Web App to Vercel

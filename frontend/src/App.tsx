@@ -177,7 +177,7 @@ export default function App() {
             <div className="flex items-start gap-3">
               <span className="text-danger font-mono text-sm mt-0.5">[ERR]</span>
               <div>
-                <p className="text-danger font-mono text-sm whitespace-pre-wrap break-all">{error}</p>
+                <p className="text-danger font-mono text-sm whitespace-pre-wrap break-words">{error}</p>
                 <button
                   onClick={() => { setError(null); setStatusText('IDLE'); }}
                   className="btn-brutal btn-brutal-sm mt-4"
