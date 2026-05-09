@@ -2,6 +2,7 @@ import { execFile } from 'child_process';
 import { existsSync } from 'fs';
 import { promisify } from 'util';
 import type { MediaInfo, MediaFormat, SubtitleTrack } from '../../../shared/types.js';
+import { runSpawn } from '../lib/spawn-util.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -272,12 +273,9 @@ async function runDownloadOnce(
   ];
 
   try {
-    await execFileAsync(YT_DLP_PATH, args, {
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 300000, // 5 minutes
-    });
+    await runSpawn(YT_DLP_PATH, args, { timeoutMs: 300000 });
   } catch (err: any) {
-    throw new Error(`Download failed: ${err.stderr || err.message}`);
+    throw new Error(`Download failed: ${err.message || err}`);
   }
 }
 

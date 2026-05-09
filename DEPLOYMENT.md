@@ -96,6 +96,8 @@ The frontend can be deployed separately:
 
 ### Important Notes for Render Free Tier
 
+- **CORS / custom frontend domain:** The API allows browser origins from a built-in list (`http://localhost:5173`, `http://127.0.0.1:5173`, `https://signalthief.erebuzzz.tech`) plus any extra origins in the **`CORS_ORIGINS`** environment variable (comma-separated full origins, e.g. `https://app.example.com,https://staging.example.com`). Set `CORS_ORIGINS` on the Render **backend** service if your static frontend lives on another hostname.
+
 - Free instances spin down after 15 minutes of inactivity
 - The first request after spin-down takes 30-60 seconds (cold start)
 - You get 750 hours of runtime per month (enough for one always-on instance)
@@ -598,6 +600,7 @@ You'll need to provide:
 | `NODE_ENV` | `development` | Set to `production` for deployments |
 | `LOG_LEVEL` | `info` | Logging level: `debug`, `info`, `warn`, `error` |
 | `CACHE_MAX_AGE` | `3600000` | Cache TTL in milliseconds (1 hour) |
+| `CORS_ORIGINS` | _(see below)_ | Optional comma-separated browser origins allowed **in addition to** built-in defaults (`localhost` dev URLs + `https://signalthief.erebuzzz.tech`). Required only if the web UI is hosted on another domain. |
 
 ### Frontend (`frontend/.env`)
 
@@ -617,7 +620,7 @@ You'll need to provide:
 | "FFmpeg not found" | Install FFmpeg: `choco install ffmpeg` (Win), `brew install ffmpeg` (Mac), `apt install ffmpeg` (Linux) |
 | Port 3001 already in use | Change `PORT` env var, or kill the existing process |
 | Build fails | Run `npm install && npm run build` in both `backend/` and `frontend/` folders |
-| CORS errors | Make sure your API URL is correct in the frontend config |
+| CORS errors | Set **`CORS_ORIGINS`** on the backend to include your frontend origin (full URL, no path). Defaults cover local Vite and `https://signalthief.erebuzzz.tech`; also verify `VITE_API_URL` matches your API. |
 
 ### Frontend Issues
 

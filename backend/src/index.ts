@@ -7,6 +7,7 @@ import { isInstalled, getVersion } from './services/yt-dlp.js';
 import { isInstalled as ffmpegInstalled, getVersion as ffmpegVersion } from './services/ffmpeg.js';
 import { rateLimiter } from './lib/rate-limit.js';
 import { logger } from './lib/logger.js';
+import { getCorsAllowedOrigins } from './lib/cors-origins.js';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -33,11 +34,25 @@ async function main() {
     requestTimeout: 300000, // 5 minutes
   });
 
-  // CORS
+  const corsAllowedOrigins = getCorsAllowedOrigins();
+  logger.info('CORS allowlist loaded', { count: corsAllowedOrigins.size });
+
+  // CORS: reflect Origin when it matches allowlist (safe if credentials are enabled later)
   await app.register(cors, {
-    origin: true,
+    origin: (origin, cb) => {
+      if (!origin) {
+        cb(null, true);
+        return;
+      }
+      if (corsAllowedOrigins.has(origin)) {
+        cb(null, origin);
+        return;
+      }
+      cb(null, false);
+    },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Disposition', 'Content-Length', 'Content-Type'],
   });
 
   app.get('/', async () => ({

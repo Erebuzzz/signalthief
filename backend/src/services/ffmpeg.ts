@@ -1,6 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
+import { runSpawn } from '../lib/spawn-util.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -73,12 +74,9 @@ export async function convertAudio(options: ConversionOptions): Promise<void> {
   args.push(options.output);
 
   try {
-    await execFileAsync(FFMPEG_PATH, args, {
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 300000,
-    });
+    await runSpawn(FFMPEG_PATH, args, { timeoutMs: 300000 });
   } catch (err: any) {
-    throw new Error(`FFmpeg conversion failed: ${err.stderr || err.message}`);
+    throw new Error(`FFmpeg conversion failed: ${err.message || err}`);
   }
 }
 
@@ -127,12 +125,9 @@ export async function convertVideo(
   args.push(output);
 
   try {
-    await execFileAsync(FFMPEG_PATH, args, {
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 600000, // 10 minutes
-    });
+    await runSpawn(FFMPEG_PATH, args, { timeoutMs: 600000 });
   } catch (err: any) {
-    throw new Error(`FFmpeg video conversion failed: ${err.stderr || err.message}`);
+    throw new Error(`FFmpeg video conversion failed: ${err.message || err}`);
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { MediaInfo, MediaFormat, ExtractResponse, DownloadResponse } from '../../shared/types';
 import Header from './components/Header';
 import UrlInput from './components/UrlInput';
@@ -7,7 +7,9 @@ import Footer from './components/Footer';
 import Terminal from './components/Terminal';
 import HowToUse from './components/HowToUse';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:3001' : 'https://signalthief-api.onrender.com');
 
 type Toast = {
   id: number;
@@ -27,6 +29,12 @@ export default function App() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [statusText, setStatusText] = useState('IDLE');
   const [currentPage, setCurrentPage] = useState<'app' | 'help'>('app');
+  const extractResultsRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!mediaInfo || loading) return;
+    extractResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [mediaInfo, loading]);
 
   const addToast = useCallback((type: Toast['type'], message: string) => {
     const id = Date.now();
@@ -194,7 +202,7 @@ export default function App() {
           <section className="brutal-panel p-6 mb-8 animate-flicker">
             <div className="flex items-center gap-3 mb-6">
               <span className="status-dot-amber" />
-              <span className="terminal-text text-accent text-sm">EXTRACTING AUDIO STREAMS...</span>
+              <span className="terminal-text text-accent text-sm">FETCHING MEDIA FORMATS...</span>
             </div>
             <div className="space-y-3">
               <div className="skeleton skeleton-text" />
@@ -211,7 +219,7 @@ export default function App() {
 
         {/* Media Info / Format Selection */}
         {mediaInfo && !loading && (
-          <section className="brutal-panel p-6 mb-8">
+          <section ref={extractResultsRef} className="brutal-panel p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <span className="status-dot" />
