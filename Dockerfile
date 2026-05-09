@@ -4,13 +4,17 @@ RUN apk add --no-cache python3 py3-pip ffmpeg curl
 
 RUN pip3 install --break-system-packages yt-dlp
 
-WORKDIR /app
+WORKDIR /app/backend
 
 COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
-COPY backend/ ./
-COPY shared/ ./shared/
+WORKDIR /app
+COPY backend ./backend
+COPY shared ./shared
+COPY packages ./packages
+
+WORKDIR /app/backend
 
 ENV PORT=3001
 ENV HOST=0.0.0.0

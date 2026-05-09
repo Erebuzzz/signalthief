@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc --noEmit",
+    "test": "tsx ../packages/tests/run-core-tests.ts",
     "start": "npx tsx src/index.ts"
   },
   "dependencies": {

@@ -17,5 +17,6 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "../shared"]
+  "include": ["src", "../shared", "../packages/shared/src"],
+  "exclude": ["../packages/**/*.test.ts", "../packages/tests/**/*"]
 }

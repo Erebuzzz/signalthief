@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "outDir": "dist",
+    "rootDir": "../..",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "typeRoots": ["../../backend/node_modules/@types"]
+  },
+  "include": ["src/**/*", "../../packages/**/*", "../../shared/**/*"],
+  "exclude": ["node_modules", "dist", "../../packages/**/*.test.ts", "../../packages/tests/**/*"]
+}

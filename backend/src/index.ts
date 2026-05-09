@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { extractRoutes } from './routes/extract.js';
 import { downloadRoutes } from './routes/download.js';
+import { jobRoutes } from './routes/jobs.js';
 import { startPeriodicCleanup } from './services/cache.js';
 import { isInstalled, getVersion } from './services/yt-dlp.js';
 import { isInstalled as ffmpegInstalled, getVersion as ffmpegVersion } from './services/ffmpeg.js';
@@ -64,6 +65,7 @@ async function main() {
   app.get('/favicon.ico', async (_req, reply) => reply.code(204).send());
 
   // Routes
+  await app.register(jobRoutes);
   await app.register(extractRoutes);
   await app.register(downloadRoutes);
 

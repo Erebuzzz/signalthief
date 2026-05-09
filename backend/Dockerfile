@@ -4,14 +4,17 @@ RUN apk add --no-cache python3 py3-pip ffmpeg curl
 
 RUN pip3 install --break-system-packages yt-dlp
 
-WORKDIR /app
+WORKDIR /app/backend
 
 COPY backend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
-COPY backend/ ./
-COPY shared/ ./shared/
-RUN npm run build || true
+WORKDIR /app
+COPY backend ./backend
+COPY shared ./shared
+COPY packages ./packages
+
+WORKDIR /app/backend
 
 ENV PORT=3001
 ENV HOST=0.0.0.0
@@ -19,4 +22,4 @@ ENV NODE_ENV=production
 
 EXPOSE 3001
 
-CMD ["node", "dist/index.js"]
+CMD ["npx", "tsx", "src/index.ts"]

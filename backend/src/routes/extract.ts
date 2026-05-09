@@ -5,8 +5,11 @@ import { ApiError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import { rateLimiter } from '../lib/rate-limit.js';
 
+const DEPRECATED_EXTRACT_WARNING =
+  'POST /api/extract is a compatibility route. New clients should prefer the local desktop bridge for source extraction.';
+
 export async function extractRoutes(app: FastifyInstance) {
-  // POST /api/extract — get media info from URL
+  // POST /api/extract: compatibility route for existing web and extension clients.
   app.post('/api/extract', async (
     request: FastifyRequest<{ Body: ExtractRequest }>,
     reply: FastifyReply
@@ -44,11 +47,18 @@ export async function extractRoutes(app: FastifyInstance) {
         title: info.title?.slice(0, 60),
         formats: info.formats?.length,
         duration: Date.now() - start,
+        compatibilityRoute: true,
       });
+
+      reply.header('Deprecation', 'true');
+      reply.header('Sunset', 'Phase 3');
+      reply.header('Link', '</api/jobs>; rel="successor-version"');
+      reply.header('X-SignalThief-Warning', DEPRECATED_EXTRACT_WARNING);
 
       return reply.send({
         success: true,
         data: info,
+        warning: DEPRECATED_EXTRACT_WARNING,
       } as ExtractResponse);
     } catch (err: any) {
       if (err instanceof ApiError) {
