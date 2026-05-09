@@ -1,4 +1,5 @@
 import { execFile } from 'child_process';
+import { existsSync } from 'fs';
 import { promisify } from 'util';
 import type { MediaInfo, MediaFormat, SubtitleTrack } from '../../../shared/types.js';
 
@@ -6,6 +7,54 @@ const execFileAsync = promisify(execFile);
 
 const YT_DLP_PATH = process.env.YT_DLP_PATH || 'yt-dlp';
 let INSTALL_PROMISE: Promise<boolean> | null = null;
+
+/** Ordered YouTube player_client strategies for datacenter / bot-check resilience */
+const YOUTUBE_PLAYER_CLIENT_STRATEGIES = [
+  'youtube:player_client=android,ios,web',
+  'youtube:player_client=tv_embedded',
+  'youtube:player_client=android_creator',
+  'youtube:player_client=web_embedded',
+];
+
+function cookiesArgs(): string[] {
+  const p = process.env.YTDLP_COOKIES_FILE;
+  if (p && existsSync(p)) {
+    return ['--cookies', p];
+  }
+  return [];
+}
+
+/**
+ * For YouTube hosts, normalize music.youtube.com/watch and youtu.be links to
+ * canonical https://www.youtube.com/watch?v=VIDEO_ID when the id is parsable.
+ */
+export function normalizeMediaUrl(url: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+
+  const host = parsed.hostname.replace(/^www\./i, '').toLowerCase();
+
+  if (host === 'youtu.be') {
+    const segment = parsed.pathname.replace(/^\//, '').split('/')[0]?.split('?')[0];
+    if (segment && /^[\w-]{11}$/.test(segment)) {
+      return `https://www.youtube.com/watch?v=${segment}`;
+    }
+    return url;
+  }
+
+  if (host === 'music.youtube.com' && parsed.pathname.startsWith('/watch')) {
+    const v = parsed.searchParams.get('v');
+    if (v && /^[\w-]{11}$/.test(v)) {
+      return `https://www.youtube.com/watch?v=${v}`;
+    }
+  }
+
+  return url;
+}
 
 async function tryAutoInstall(): Promise<boolean> {
   if (await isInstalled()) return true;
@@ -23,7 +72,7 @@ async function tryAutoInstall(): Promise<boolean> {
 
   for (const { args } of installCommands) {
     try {
-      const { stdout, stderr } = await execFileAsync(args[0], args.slice(1), { timeout: 60000 });
+      await execFileAsync(args[0], args.slice(1), { timeout: 60000 });
       // Re-check if yt-dlp is now available
       if (await isInstalled()) {
         console.log('[yt-dlp] Auto-installed successfully');
@@ -70,7 +119,7 @@ function getAudioQuality(acodec: string | null): number {
   return 10;
 }
 
-export async function extractInfo(url: string): Promise<MediaInfo> {
+async function runExtractOnce(url: string, extractorArgs: string): Promise<MediaInfo> {
   const args = [
     '--dump-json',
     '--no-playlist',
@@ -78,7 +127,8 @@ export async function extractInfo(url: string): Promise<MediaInfo> {
     '--extractor-retries', '3',
     '--socket-timeout', '30',
     '--js-runtimes', 'node',
-    '--extractor-args', 'youtube:player_client=android,ios,web',
+    '--extractor-args', extractorArgs,
+    ...cookiesArgs(),
     url,
   ];
 
@@ -107,11 +157,29 @@ export async function extractInfo(url: string): Promise<MediaInfo> {
   }
 }
 
-export async function downloadMedia(
+async function extractInfoWithFallback(url: string): Promise<MediaInfo> {
+  let lastErr: Error | undefined;
+  for (const strategy of YOUTUBE_PLAYER_CLIENT_STRATEGIES) {
+    try {
+      return await runExtractOnce(url, strategy);
+    } catch (e: any) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+    }
+  }
+  throw lastErr ?? new Error('yt-dlp: all player client strategies failed');
+}
+
+export async function extractInfo(url: string): Promise<MediaInfo> {
+  const normalized = normalizeMediaUrl(url);
+  return extractInfoWithFallback(normalized);
+}
+
+async function runDownloadOnce(
   url: string,
   formatId: string,
   outputPath: string,
-  extraArgs: string[] = [],
+  extractorArgs: string,
+  extraArgs: string[],
 ): Promise<void> {
   const args = [
     '-f', formatId,
@@ -121,7 +189,8 @@ export async function downloadMedia(
     '--no-progress',
     '--no-part',
     '--js-runtimes', 'node',
-    '--extractor-args', 'youtube:player_client=android,ios,web',
+    '--extractor-args', extractorArgs,
+    ...cookiesArgs(),
     ...extraArgs,
     url,
   ];
@@ -134,6 +203,25 @@ export async function downloadMedia(
   } catch (err: any) {
     throw new Error(`Download failed: ${err.stderr || err.message}`);
   }
+}
+
+export async function downloadMedia(
+  url: string,
+  formatId: string,
+  outputPath: string,
+  extraArgs: string[] = [],
+): Promise<void> {
+  const normalized = normalizeMediaUrl(url);
+  let lastErr: Error | undefined;
+  for (const strategy of YOUTUBE_PLAYER_CLIENT_STRATEGIES) {
+    try {
+      await runDownloadOnce(normalized, formatId, outputPath, strategy, extraArgs);
+      return;
+    } catch (e: any) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+    }
+  }
+  throw lastErr ?? new Error('Download failed: all player client strategies failed');
 }
 
 export async function extractAudio(

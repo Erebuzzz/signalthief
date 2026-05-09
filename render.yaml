@@ -5,6 +5,10 @@ services:
     plan: free
     healthCheckPath: /api/health
     envVars:
+      # Optional: path to Netscape cookie file on disk (e.g. bind mount / secret file).
+      # Uncomment and set sync: false if you store cookies via Render secret files:
+      # - key: YTDLP_COOKIES_FILE
+      #   sync: false
       - key: NODE_ENV
         value: production
       - key: PORT

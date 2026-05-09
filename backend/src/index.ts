@@ -40,6 +40,14 @@ async function main() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  app.get('/', async () => ({
+    name: 'SignalThief API',
+    health: '/api/health',
+    docs: 'https://github.com/Erebuzzz/signalthief',
+  }));
+
+  app.get('/favicon.ico', async (_req, reply) => reply.code(204).send());
+
   // Routes
   await app.register(extractRoutes);
   await app.register(downloadRoutes);
